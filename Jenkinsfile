@@ -1,25 +1,76 @@
 pipeline {
     agent any
 
+    environment {
+        EMAIL = "akramsyed8046@gmail.com"
+    }
+
     stages {
 
         stage('Clone Repository') {
             steps {
-               git branch: 'main', url: 'https://github.com/akramsyed8046/Devops-html-app.git'
+                git branch: 'main', url: 'https://github.com/akramsyed8046/Devops-html-app.git'
+            }
+            post {
+                success {
+                    emailext subject: "✅ Clone SUCCESS",
+                    body: "Repository cloned successfully.",
+                    to: "${EMAIL}"
+                }
+                failure {
+                    emailext subject: "❌ Clone FAILED",
+                    body: "Repository cloning failed.",
+                    to: "${EMAIL}"
+                }
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Deploy to Kubernetes') {
             steps {
-                sh 'docker build -t devops-html-app .'
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh '''
+                    export KUBECONFIG=$KUBECONFIG
+                    kubectl apply -f deployment.yaml
+                    kubectl apply -f service.yaml
+                    '''
+                }
+            }
+            post {
+                success {
+                    emailext subject: "✅ Deployment SUCCESS",
+                    body: "Application deployed to Kubernetes successfully.",
+                    to: "${EMAIL}"
+                }
+                failure {
+                    emailext subject: "❌ Deployment FAILED",
+                    body: "Kubernetes deployment failed. Check logs.",
+                    to: "${EMAIL}"
+                }
             }
         }
 
-        stage('Run Docker Container') {
+        stage('Verify Deployment') {
             steps {
-                sh 'docker run -d -p 4000:80 --name html-container devops-html-app'
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh '''
+                    export KUBECONFIG=$KUBECONFIG
+                    kubectl get pods
+                    kubectl get svc
+                    '''
+                }
+            }
+            post {
+                success {
+                    emailext subject: "✅ Verification SUCCESS",
+                    body: "Pods and services are running successfully.",
+                    to: "${EMAIL}"
+                }
+                failure {
+                    emailext subject: "❌ Verification FAILED",
+                    body: "Verification failed. Check Kubernetes resources.",
+                    to: "${EMAIL}"
+                }
             }
         }
-
     }
 }
