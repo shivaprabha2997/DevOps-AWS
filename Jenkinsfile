@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         EMAIL = "akramsyed8046@gmail.com"
+        KUBECONFIG_PATH = "/var/lib/jenkins/.kube/config" // Manual path
     }
 
     stages {
@@ -27,22 +28,20 @@ pipeline {
 
         stage('Test K8s Connection') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''
-                    echo "Checking Kubernetes connection..."
-                    kubectl --kubeconfig=$KUBECONFIG get nodes
-                    '''
-                }
+                sh """
+                echo 'Checking Kubernetes connection...'
+                kubectl --kubeconfig=${KUBECONFIG_PATH} get nodes
+                """
             }
             post {
                 success {
                     emailext subject: "✅ K8s Connection SUCCESS",
-                    body: "Jenkins connected to Kubernetes successfully.",
+                    body: "Kubernetes cluster is reachable.",
                     to: "${EMAIL}"
                 }
                 failure {
                     emailext subject: "❌ K8s Connection FAILED",
-                    body: "Jenkins could not connect to Kubernetes.",
+                    body: "Cannot connect to Kubernetes cluster. Check kubeconfig path or permissions.",
                     to: "${EMAIL}"
                 }
             }
@@ -50,14 +49,10 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''
-                    echo "Deploying application..."
-
-                    kubectl --kubeconfig=$KUBECONFIG apply -f deployment.yaml
-                    kubectl --kubeconfig=$KUBECONFIG apply -f service.yaml
-                    '''
-                }
+                sh """
+                kubectl --kubeconfig=${KUBECONFIG_PATH} apply -f deployment.yaml
+                kubectl --kubeconfig=${KUBECONFIG_PATH} apply -f service.yaml
+                """
             }
             post {
                 success {
@@ -67,7 +62,7 @@ pipeline {
                 }
                 failure {
                     emailext subject: "❌ Deployment FAILED",
-                    body: "Deployment failed. Check Jenkins logs.",
+                    body: "Kubernetes deployment failed. Check logs.",
                     to: "${EMAIL}"
                 }
             }
@@ -75,19 +70,15 @@ pipeline {
 
         stage('Verify Deployment') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''
-                    echo "Verifying deployment..."
-
-                    kubectl --kubeconfig=$KUBECONFIG get pods -o wide
-                    kubectl --kubeconfig=$KUBECONFIG get svc
-                    '''
-                }
+                sh """
+                kubectl --kubeconfig=${KUBECONFIG_PATH} get pods
+                kubectl --kubeconfig=${KUBECONFIG_PATH} get svc
+                """
             }
             post {
                 success {
                     emailext subject: "✅ Verification SUCCESS",
-                    body: "Pods and services verified successfully.",
+                    body: "Pods and services are running successfully.",
                     to: "${EMAIL}"
                 }
                 failure {
