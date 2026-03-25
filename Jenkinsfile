@@ -13,18 +13,6 @@ pipeline {
                 git branch: 'main',
                     url: 'https://github.com/akramsyed8046/Devops-html-app.git'
             }
-            post {
-                success {
-                    emailext subject: "✅ Clone SUCCESS",
-                    body: "Repository cloned successfully.",
-                    to: "${EMAIL}"
-                }
-                failure {
-                    emailext subject: "❌ Clone FAILED",
-                    body: "Repository cloning failed.",
-                    to: "${EMAIL}"
-                }
-            }
         }
 
         stage('Test K8s Connection') {
@@ -34,38 +22,17 @@ pipeline {
                 kubectl --kubeconfig=$KUBECONFIG_PATH get nodes
                 '''
             }
-            post {
-                success {
-                    emailext subject: "✅ K8s Connection SUCCESS",
-                    body: "Kubernetes cluster is reachable.",
-                    to: "${EMAIL}"
-                }
-                failure {
-                    emailext subject: "❌ K8s Connection FAILED",
-                    body: "Cannot connect to Kubernetes cluster. Check kubeconfig / network.",
-                    to: "${EMAIL}"
-                }
-            }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
+                echo "Deploying application..."
+
+                # IMPORTANT: using workspace files
                 kubectl --kubeconfig=$KUBECONFIG_PATH apply -f deployment.yaml
                 kubectl --kubeconfig=$KUBECONFIG_PATH apply -f service.yaml
                 '''
-            }
-            post {
-                success {
-                    emailext subject: "✅ Deployment SUCCESS",
-                    body: "Application deployed successfully.",
-                    to: "${EMAIL}"
-                }
-                failure {
-                    emailext subject: "❌ Deployment FAILED",
-                    body: "Deployment failed. Check logs.",
-                    to: "${EMAIL}"
-                }
             }
         }
 
@@ -75,18 +42,6 @@ pipeline {
                 kubectl --kubeconfig=$KUBECONFIG_PATH get pods
                 kubectl --kubeconfig=$KUBECONFIG_PATH get svc
                 '''
-            }
-            post {
-                success {
-                    emailext subject: "✅ Verification SUCCESS",
-                    body: "Pods and services are running.",
-                    to: "${EMAIL}"
-                }
-                failure {
-                    emailext subject: "❌ Verification FAILED",
-                    body: "Verification failed.",
-                    to: "${EMAIL}"
-                }
             }
         }
     }
