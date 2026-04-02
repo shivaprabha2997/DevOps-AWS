@@ -7,13 +7,14 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/akramsyed8046/Devops-html-app.git'
             }
         }
-
+        
+/*
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
             }
         }
-
+*/
         stage('Build Project') {
             steps {
                 sh 'npm run build'
