@@ -72,17 +72,16 @@ pipeline {
             }
         }
 
-        stage('Publish to Nexus') {
-            steps {
-                withCredentials([string(credentialsId: 'nexus-token', variable: 'NEXUS_TOKEN')]) {
-                sh '''
-    VERSION=$(node -p "require('./package.json').version")
-    REPO=http://3.110.170.36:8081/repository/maven-releases/
-    ARTIFACT="devops-html-app-${VERSION}.zip"
+       stage('Publish to Nexus') {
+    steps {
+        withCredentials([string(credentialsId: 'nexus-token', variable: 'NEXUS_TOKEN')]) {
+            sh '''
+            VERSION=$(node -p "require('./package.json').version")
+            ARTIFACT="devops-html-app-${VERSION}.zip"
+            REPO="http://3.110.170.36:8081/repository/raw-repo/"
 
-    # Use token for Nexus authentication
-    curl -v -u $NEXUS_TOKEN: --upload-file artifact/devops-html-app.zip $REPO$ARTIFACT
-    '''
+            curl -v -u $NEXUS_TOKEN: --upload-file artifact/devops-html-app.zip $REPO$ARTIFACT
+            '''
                 }
             }
         }
