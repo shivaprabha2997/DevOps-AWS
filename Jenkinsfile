@@ -99,27 +99,15 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
-                    sh '''
-                    export KUBECONFIG=$KUBECONFIG_FILE
-
-                    echo "Connected Cluster:"
-                    kubectl config current-context
-
-                    echo "Cluster Nodes:"
-                    kubectl get nodes
-
-                    echo "Deploying application..."
-                    kubectl apply -f deployment.yaml
-                    kubectl apply -f service.yaml
-
-                    echo "Checking rollout status..."
-                    kubectl rollout status deployment/devops-html-deployment
-                    '''
-                }
-            }
+       stage('K8s Deployment') {
+         steps {
+            
+                sh '''
+                aws eks update-kubeconfig --region ap-south-1 --name rehcluster
+                kubectl get nodes
+                kubectl apply -f deployment.yaml
+                kubectl apply -f service.yaml
+                '''
         }
     }
 
