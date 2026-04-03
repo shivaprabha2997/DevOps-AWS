@@ -4,7 +4,7 @@ pipeline {
     tools {
         maven 'maven3'       // Required for SonarQube
         jdk 'JDK25'          // Jenkins JDK
-        nodejs 'Node16'      // Jenkins NodeJS tool
+        nodejs 'Node18'      // Jenkins NodeJS tool
     }
 
     environment {
