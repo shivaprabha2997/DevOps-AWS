@@ -2,18 +2,18 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven3'       // Jenkins Maven tool
+        maven 'maven3'       // Required for SonarQube
         jdk 'JDK25'          // Jenkins JDK
         nodejs 'Node16'      // Jenkins NodeJS tool
     }
 
     environment {
         DOCKER_IMAGE = "akramsyed8046/devops-html-app:latest"
-        DOCKER_CREDENTIALS = "docker-hub"       // Docker Hub credentials ID
-        SONARQUBE_ENV = "SonarQube"             // Jenkins SonarQube server
-        NEXUS_TOKEN = credentials('nexus-token') // Nexus npm token from Jenkins
+        DOCKER_CREDENTIALS = "docker-hub"       
+        SONARQUBE_ENV = "sonarqube"             
+        NEXUS_TOKEN = credentials('nexus-token') 
         NEXUS_URL = "http://3.110.170.36:8081/repository/npm-releases/"
-        PATH = "${tool 'Node16'}/bin:${env.PATH}" // NodeJS path
+        PATH = "${tool 'Node16'}/bin:${env.PATH}" 
     }
 
     stages {
@@ -26,13 +26,11 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                withCredentials([string(credentialsId: 'nexus-token', variable: 'NEXUS_TOKEN')]) {
-                    sh '''
-                    echo "registry=${NEXUS_URL}" > .npmrc
-                    echo "//3.110.170.36:8081/repository/npm-releases/:_authToken=$NEXUS_TOKEN" >> .npmrc
-                    npm install || echo "No package.json found, skipping install"
-                    '''
-                }
+                sh '''
+                echo "registry=${NEXUS_URL}" > .npmrc
+                echo "//3.110.170.36:8081/repository/npm-releases/:_authToken=$NEXUS_TOKEN" >> .npmrc
+                npm install || echo "No package.json found, skipping install"
+                '''
             }
         }
 
@@ -75,8 +73,15 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'nexus-token', variable: 'NEXUS_TOKEN')]) {
                     sh '''
-                    echo "registry=${NEXUS_URL}" > .npmrc
-                    echo "//3.110.170.36:8081/repository/npm-releases/:_authToken=$NEXUS_TOKEN" >> .npmrc
+                    VERSION=$(node -p "require('./package.json').version")
+                    if [[ "$VERSION" == *"-SNAPSHOT"* ]]; then
+                        REPO=http://3.110.170.36:8081/repository/npm-snapshots/
+                    else
+                        REPO=http://3.110.170.36:8081/repository/npm-releases/
+                    fi
+
+                    echo "registry=$REPO" > .npmrc
+                    echo "//$REPO:_authToken=$NEXUS_TOKEN" >> .npmrc
                     npm publish || echo "Publish failed, check package.json version"
                     '''
                 }
