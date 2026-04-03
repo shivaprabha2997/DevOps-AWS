@@ -13,7 +13,7 @@ pipeline {
         SONARQUBE_ENV = "sonarqube"             
         NEXUS_TOKEN = credentials('nexus-token') 
         NEXUS_URL = "http://3.110.170.36:8081/repository/npm-releases/"
-        PATH = "${tool 'Node16'}/bin:${env.PATH}" 
+        PATH = "${tool 'Node18'}/bin:${env.PATH}" 
     }
 
     stages {
