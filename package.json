@@ -1,9 +1,10 @@
 {
   "name": "devops-html-app",
-  "version": "1.0.0",
+  "version": "1.0.0", // change to 1.0.1-SNAPSHOT for snapshot builds
   "description": "Simple static HTML DevOps project",
   "scripts": {
-    "build": "zip -r devops-html-app.zip src/"
+    "build": "zip -r devops-html-app.zip src/",
+    "prepublishOnly": "echo 'Preparing .npmrc for Nexus publish'"
   },
   "author": "Akram",
   "license": "MIT",
