@@ -103,7 +103,7 @@ pipeline {
          steps {
             
                 sh '''
-                aws eks update-kubeconfig --region ap-south-1 --name rehcluster
+                aws eks update-kubeconfig --region ap-south-1 --name cluster1
                 kubectl get nodes
                 kubectl apply -f deployment.yaml
                 kubectl apply -f service.yaml
