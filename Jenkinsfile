@@ -12,7 +12,7 @@ pipeline {
         PATH = "${tool 'Node18'}/bin:${env.PATH}"
         KUBECONFIG_PATH = "/var/lib/jenkins/.kube/config"
         AWS_REGION          = "us-east-1"        // ← add your region
-        EKS_CLUSTER         = "your-cluster-name" // ← add your cluster name
+        EKS_CLUSTER         = "mycluster" // ← add your cluster name
     }
     stages {
         stage('Checkout') {
