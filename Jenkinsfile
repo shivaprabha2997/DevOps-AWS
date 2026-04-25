@@ -96,7 +96,7 @@ pipeline {
               docker rm devopscont25 || true
 
                 # Run new container
-                docker run -itd  --name devopscont25 -p 8025:80 akramsyed8046/devops-html-app:latest
+                docker run -itd  --name devopscont25 -p 8025:80 shivadocker2997/devops-html-app:latest
                 echo "Container is running at http://<your-server-ip>:8025"
                 '''
             }
