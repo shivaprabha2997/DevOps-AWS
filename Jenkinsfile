@@ -119,5 +119,15 @@ pipeline {
                 """
             }
         }
+        
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh """
+                export KUBECONFIG=${KUBECONFIG_PATH}
+                kubectl apply -f deployment.yml
+                kubectl rollout status deployment deploytes
+                """
+            }
+        }
     }
 }
