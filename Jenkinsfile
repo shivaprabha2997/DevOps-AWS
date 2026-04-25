@@ -10,6 +10,7 @@ pipeline {
         SONARQUBE_ENV = "sonarqube_cred"
         NEXUS_REPO = "http://18.215.153.18:8081/repository/raw-repo/"
         PATH = "${tool 'Node18'}/bin:${env.PATH}"
+        KUBECONFIG_PATH = "/var/lib/jenkins/.kube/config"
     }
     stages {
         stage('Checkout') {
@@ -107,6 +108,15 @@ pipeline {
                 docker run -itd  --name devopscont25 -p 8025:80 shivadocker2997/devops-html-app:latest
                 echo "Container is running at http://<your-server-ip>:8025"
                 '''
+            }}
+        
+        stage('Configure AWS EKS') {
+            steps {
+                sh """
+                aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER}
+                export KUBECONFIG=${KUBECONFIG_PATH}
+                kubectl get nodes
+                """
             }
         }
     }
