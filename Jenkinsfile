@@ -8,7 +8,7 @@ pipeline {
         DOCKER_IMAGE = "shivadocker2997/devops-html-app:latest"
         DOCKER_CREDENTIALS = "Docker_cred"
         SONARQUBE_ENV = "sonarqube_cred"
-        NEXUS_REPO = "http://54.90.98.217:8081/repository/raw-repo/"
+        NEXUS_REPO = "http://54.198.245.67:8081/repository/raw-repo/"
         PATH = "${tool 'Node18'}/bin:${env.PATH}"
         KUBECONFIG_PATH = "/var/lib/jenkins/.kube/config"
         AWS_REGION          = "us-east-1"        // ← add your region
